@@ -36,38 +36,30 @@ public class SnakeApp extends Application {
         BorderPane root = new BorderPane();
         root.setBackground(new Background(new BackgroundFill(Color.BLACK, CornerRadii.EMPTY, Insets.EMPTY)));
 
-        // Create a smaller rectangle representing the game area boundaries with a white border
         Rectangle boundary = new Rectangle(GRID_SIZE * CELL_SIZE - 2, GRID_SIZE * CELL_SIZE - 2, Color.TRANSPARENT);
         boundary.setStroke(Color.WHITE);
         boundary.setStrokeWidth(2);
 
-        // Create a rectangle representing the snake with a smaller size
         Rectangle snakeHead = new Rectangle(CELL_SIZE * 0.4, CELL_SIZE * 0.4, Color.GREEN);
 
-        // Modify the StackPane creation for snake and boundary
         StackPane snakeStackPane = new StackPane(boundary, snakeHead);
         snakeStackPane.setAlignment(Pos.TOP_LEFT);
 
-        // Set the initial position of the snake to the center of the game area
         snakeStackPane.setTranslateX((GRID_SIZE / 2) * CELL_SIZE);
         snakeStackPane.setTranslateY((GRID_SIZE / 2) * CELL_SIZE);
 
-        // Add the initial snake head to the body list
         snakeBody.add(snakeHead);
 
-        // Buttons for navigation
         Button btnUp = createStyledButton("Up");
         Button btnDown = createStyledButton("Down");
         Button btnLeft = createStyledButton("Left");
         Button btnRight = createStyledButton("Right");
 
-        // Event handlers for button navigation
         btnUp.setOnAction(e -> changeDirection(0, -1));
         btnDown.setOnAction(e -> changeDirection(0, 1));
         btnLeft.setOnAction(e -> changeDirection(-1, 0));
         btnRight.setOnAction(e -> changeDirection(1, 0));
 
-        // Keyboard controls
         Scene scene = new Scene(root, GRID_SIZE * CELL_SIZE, GRID_SIZE * CELL_SIZE, Color.BLACK);
         scene.setOnKeyPressed(event -> {
             KeyCode code = event.getCode();
@@ -87,7 +79,6 @@ public class SnakeApp extends Application {
             }
         });
 
-        // Layout for buttons
         GridPane buttonGrid = new GridPane();
         buttonGrid.setHgap(10);
         buttonGrid.setVgap(10);
@@ -98,7 +89,6 @@ public class SnakeApp extends Application {
         buttonGrid.add(btnLeft, 0, 1);
         buttonGrid.add(btnRight, 2, 1);
 
-        // Add everything to the root
         root.setCenter(snakeStackPane);
         root.setLeft(buttonGrid);
 
@@ -106,17 +96,14 @@ public class SnakeApp extends Application {
         primaryStage.setScene(scene);
         primaryStage.show();
 
-        // Set up a Timeline to periodically move the snake
         Timeline timeline = new Timeline(new KeyFrame(Duration.millis(200), e -> moveSnake()));
         timeline.setCycleCount(Animation.INDEFINITE);
         timeline.play();
 
-        // Add a red pixel at random position within the game area
         addRandomRedPixel(snakeStackPane);
     }
 
     private void handleCollision(StackPane snakeStackPane) {
-        // Increase the length of the snake by adding a single body part
         Rectangle newBodyPart = new Rectangle(CELL_SIZE, CELL_SIZE, Color.GREEN);
         snakeBody.add(newBodyPart);
         snakeStackPane.getChildren().add(newBodyPart);
@@ -126,17 +113,13 @@ public class SnakeApp extends Application {
         int newSnakeX = (snakeX + directionX + GRID_SIZE) % GRID_SIZE;
         int newSnakeY = (snakeY + directionY + GRID_SIZE) % GRID_SIZE;
 
-        // Check if the new position is outside the white boundary
         if (newSnakeX < 0 || newSnakeX >= GRID_SIZE || newSnakeY < 0 || newSnakeY >= GRID_SIZE) {
-            // Respawn on the opposite side
             snakeX = (snakeX + directionX + GRID_SIZE) % GRID_SIZE;
             snakeY = (snakeY + directionY + GRID_SIZE) % GRID_SIZE;
         } else {
-            // Check if the snake collides with itself
             for (Rectangle bodyPart : snakeBody) {
                 if (newSnakeX == (int) (bodyPart.getTranslateX() / CELL_SIZE) &&
                     newSnakeY == (int) (bodyPart.getTranslateY() / CELL_SIZE)) {
-                    // Snake collided with itself, end the game
                     handleGameOver();
                     return;
                 }
@@ -146,28 +129,18 @@ public class SnakeApp extends Application {
             snakeY = newSnakeY;
         }
 
-        // Update snake position
         StackPane snakeStackPane = (StackPane) ((BorderPane) primaryStage.getScene().getRoot()).getCenter();
         Rectangle snakeHead = snakeBody.getFirst();
-
-        // Get the last red pixel
         Rectangle redPixel = (Rectangle) snakeStackPane.getChildren().get(snakeStackPane.getChildren().size() - 1);
 
-        // Check if the snake has eaten a pixel
         if (snakeX == (int) (redPixel.getTranslateX() / CELL_SIZE) && snakeY == (int) (redPixel.getTranslateY() / CELL_SIZE)) {
-            // Increase the length of the snake by adding a single body part
             Rectangle newBodyPart = new Rectangle(CELL_SIZE, CELL_SIZE, Color.GREEN);
             snakeBody.add(0, newBodyPart);
             snakeStackPane.getChildren().add(0, newBodyPart);
-
-            // Remove the red pixel from the StackPane
             snakeStackPane.getChildren().remove(redPixel);
-
-            // Add a new red pixel at a random position
             addRandomRedPixel(snakeStackPane);
         }
 
-        // Move the rest of the snake body
         for (int i = snakeBody.size() - 1; i > 0; i--) {
             Rectangle bodyPart = snakeBody.get(i);
             Rectangle previousBodyPart = snakeBody.get(i - 1);
@@ -176,44 +149,30 @@ public class SnakeApp extends Application {
             bodyPart.setTranslateY(previousBodyPart.getTranslateY());
         }
 
-        // Adjust snake position
         snakeHead.setTranslateX((snakeX + GRID_SIZE) % GRID_SIZE * CELL_SIZE);
         snakeHead.setTranslateY((snakeY + GRID_SIZE) % GRID_SIZE * CELL_SIZE);
-
-        // Adjust snake size
         snakeHead.setWidth(CELL_SIZE);
         snakeHead.setHeight(CELL_SIZE);
     }
 
     private void handleGameOver() {
-        // Calculate the player's score based on the length of the snake
         int score = snakeBody.size();
-
-        // Create a Text node for the game over message
         Text gameOverText = new Text("Game Over!\nYour Score: " + score);
         gameOverText.setFill(Color.WHITE);
         gameOverText.setFont(Font.font("Arial", 20));
 
-        // Set the position of the game over text
         StackPane snakeStackPane = (StackPane) ((BorderPane) primaryStage.getScene().getRoot()).getCenter();
         gameOverText.setTranslateX((GRID_SIZE * CELL_SIZE - gameOverText.getBoundsInLocal().getWidth()) / 2);
         gameOverText.setTranslateY(GRID_SIZE * CELL_SIZE / 2);
 
-        // Add the game over text to the game area
         snakeStackPane.getChildren().add(gameOverText);
-
-        // Optionally, you can stop the timeline or reset the game state here
     }
 
-    
     private void changeDirection(int dx, int dy) {
-        // Check if the new direction is opposite to the current direction
         if ((directionX == 0 && dx != 0) || (directionY == 0 && dy != 0)) {
-            // The new direction is valid, update the direction
             directionX = dx;
             directionY = dy;
         }
-        // Otherwise, the new direction is invalid, and the snake continues in the current direction
     }
 
     private Button createStyledButton(String text) {
@@ -232,11 +191,9 @@ public class SnakeApp extends Application {
             randomY = random.nextInt(GRID_SIZE);
         } while (isOnSnake(snakeStackPane, randomX, randomY));
 
-        // Set the position of the red pixel within the game area
         redPixel.setTranslateX(randomX * CELL_SIZE);
         redPixel.setTranslateY(randomY * CELL_SIZE);
 
-        // Add the red pixel to the StackPane instead of the BorderPane
         snakeStackPane.getChildren().add(redPixel);
     }
 
