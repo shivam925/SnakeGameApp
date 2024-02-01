@@ -1,4 +1,4 @@
-# **SnakeApp - Jeu de serpent en JavaFX**
+# **SnakeApp - Jeu de serpent en JavaFX par Surjoo Yogheshwar**
 
 ## Aperçu
 SnakeApp est une application JavaFX qui implémente le jeu classique du serpent. Les joueurs contrôlent un serpent, évitant les collisions avec les bords de l'aire de jeu et leur propre corps tout en collectant des pixels rouges pour augmenter leur longueur.
